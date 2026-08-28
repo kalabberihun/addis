@@ -27,7 +27,7 @@ export const getSongs = async (req: Request, res: Response, next: NextFunction) 
 // Get a song by ID
 export const getSong = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const song = await songService.getSongById(req.params.id);
+    const song = await songService.getSongById(req.params.id as string);
     if (!song) {
       return res.status(404).json({ message: 'Song not found' });
     }
@@ -41,7 +41,7 @@ export const getSong = async (req: Request, res: Response, next: NextFunction) =
 export const updateSong = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const validated = updateSongSchema.parse(req.body);
-    const updated = await songService.updateSong(req.params.id, validated);
+    const updated = await songService.updateSong(req.params.id as string, validated);
     if (!updated) {
       return res.status(404).json({ message: 'Song not found' });
     }
@@ -54,7 +54,7 @@ export const updateSong = async (req: Request, res: Response, next: NextFunction
 // Delete a song
 export const deleteSong = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const deleted = await songService.deleteSong(req.params.id);
+    const deleted = await songService.deleteSong(req.params.id as string);
     if (!deleted) {
       return res.status(404).json({ message: 'Song not found' });
     }

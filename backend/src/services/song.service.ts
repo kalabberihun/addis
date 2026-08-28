@@ -1,7 +1,9 @@
 import { Song, ISong } from '../models/song.model';
 import { Types } from 'mongoose';
 
-export const createSong = async (data: Omit<ISong, '_id' | 'createdAt' | 'updatedAt'>): Promise<ISong> => {
+export type SongInput = Pick<ISong, 'title' | 'artist' | 'album' | 'genre'>;
+
+export const createSong = async (data: SongInput): Promise<ISong> => {
   const song = new Song(data);
   return await song.save();
 };
