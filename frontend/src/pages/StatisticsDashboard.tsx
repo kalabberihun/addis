@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import {
   Music,
@@ -269,12 +269,6 @@ const SectionTitle = styled.div`
     gap: 0.6rem;
   }
 
-  .controls-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
   span.badge {
     font-size: 0.78rem;
     font-weight: 600;
@@ -282,26 +276,6 @@ const SectionTitle = styled.div`
     border-radius: ${theme.radii.full};
     background: rgba(139, 92, 246, 0.15);
     color: #c4b5fd;
-  }
-`;
-
-const ViewToggleBtn = styled.button<{ active: boolean }>`
-  background: ${({ active }) =>
-    active ? 'rgba(139, 92, 246, 0.25)' : 'rgba(255, 255, 255, 0.04)'};
-  border: 1px solid
-    ${({ active }) =>
-      active ? 'rgba(139, 92, 246, 0.45)' : 'rgba(255, 255, 255, 0.08)'};
-  color: ${({ active }) => (active ? '#ffffff' : theme.colors.textMuted)};
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.2rem 0.65rem;
-  border-radius: ${theme.radii.full};
-  cursor: pointer;
-  transition: all ${theme.transitions.fast};
-
-  &:hover {
-    color: #ffffff;
-    background: rgba(139, 92, 246, 0.35);
   }
 `;
 
@@ -324,9 +298,6 @@ const GenreBarItem = styled.div`
     .genre-name {
       font-weight: 600;
       color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
     }
 
     .genre-count {
@@ -383,6 +354,9 @@ const StyledTable = styled.table`
     &.primary-cell {
       font-weight: 600;
       color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
   }
 
@@ -437,10 +411,6 @@ export const StatisticsDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const { statistics, statsLoading } = useAppSelector((state) => state.songs);
 
-  const [artistViewMode, setArtistViewMode] = useState<'top10' | 'all'>('top10');
-  const [albumViewMode, setAlbumViewMode] = useState<'top10' | 'all'>('top10');
-  const [genreViewMode, setGenreViewMode] = useState<'top10' | 'all'>('top10');
-
   useEffect(() => {
     dispatch(fetchStatisticsRequest());
   }, [dispatch]);
@@ -449,20 +419,14 @@ export const StatisticsDashboard: React.FC = () => {
   const topArtist = statistics?.topArtist;
   const topAlbum = statistics?.topAlbum;
 
-  const displayedArtists =
-    artistViewMode === 'top10'
-      ? statistics?.songsByArtist?.slice(0, 10) ?? []
-      : statistics?.songsByArtist ?? [];
+  // Top 10 Artists by Song Count
+  const top10Artists = statistics?.songsByArtist?.slice(0, 10) ?? [];
 
-  const displayedAlbums =
-    albumViewMode === 'top10'
-      ? statistics?.songsByAlbum?.slice(0, 10) ?? []
-      : statistics?.songsByAlbum ?? [];
+  // Top 10 Albums by Track Count
+  const top10Albums = statistics?.songsByAlbum?.slice(0, 10) ?? [];
 
-  const displayedGenres =
-    genreViewMode === 'top10'
-      ? statistics?.songsByGenre?.slice(0, 10) ?? []
-      : statistics?.songsByGenre ?? [];
+  // All Genres
+  const allGenres = statistics?.songsByGenre ?? [];
 
   return (
     <DashboardWrapper className="animate-fade-in">
@@ -475,8 +439,8 @@ export const StatisticsDashboard: React.FC = () => {
           )}
         </h2>
         <p>
-          Real-time aggregates of songs, distinct artists, albums, genre
-          distributions, and Top 10 leaderboards.
+          Real-time aggregates of songs, distinct artists, albums, and genre
+          distributions with Top 10 leaderboards.
         </p>
       </PageHeader>
 
@@ -535,16 +499,16 @@ export const StatisticsDashboard: React.FC = () => {
         </KpiCard>
       </KpiGrid>
 
-      {/* Top 1 Highlights Section */}
+      {/* #1 Top Records Highlight Cards */}
       <TopHighlightsGrid>
-        {/* Top 1 Artist by Song Count */}
+        {/* Top Artist by Song Count */}
         <HighlightCard
           accentColor="rgba(245, 158, 11, 0.4)"
           bgGlow="linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)"
         >
           <div className="badge-ribbon">
             <Crown size={14} color="#fbbf24" />
-            #1 Top Artist by Song Count
+            Top Artist Leader (#1)
           </div>
           <div className="content-row">
             <div className="trophy-icon-wrapper">
@@ -556,7 +520,7 @@ export const StatisticsDashboard: React.FC = () => {
               </h4>
               <div className="sub-artist">
                 <Flame size={14} color="#f59e0b" />
-                <span>Top catalog artist</span>
+                <span>Most songs in catalog</span>
               </div>
             </div>
           </div>
@@ -570,14 +534,14 @@ export const StatisticsDashboard: React.FC = () => {
           </div>
         </HighlightCard>
 
-        {/* Top 1 Album by Track Count */}
+        {/* Top Album by Track Count */}
         <HighlightCard
           accentColor="rgba(236, 72, 153, 0.4)"
           bgGlow="linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)"
         >
           <div className="badge-ribbon">
             <Trophy size={14} color="#f472b6" />
-            #1 Top Album by Track Count
+            Top Album Leader (#1)
           </div>
           <div className="content-row">
             <div className="trophy-icon-wrapper">
@@ -602,43 +566,29 @@ export const StatisticsDashboard: React.FC = () => {
       </TopHighlightsGrid>
 
       <ContentSplitGrid>
-        {/* Top 10 Genres Breakdown */}
+        {/* All Songs in Every Genre */}
         <SectionCard>
           <SectionTitle>
             <h3>
               <Tags size={18} color={theme.colors.primary} />
-              {genreViewMode === 'top10' ? 'Top 10 Genres' : 'All Genres'}
+              Songs by Genre
             </h3>
-            <div className="controls-group">
-              <ViewToggleBtn
-                active={genreViewMode === 'top10'}
-                onClick={() => setGenreViewMode('top10')}
-              >
-                Top 10
-              </ViewToggleBtn>
-              <ViewToggleBtn
-                active={genreViewMode === 'all'}
-                onClick={() => setGenreViewMode('all')}
-              >
-                All ({statistics?.songsByGenre?.length ?? 0})
-              </ViewToggleBtn>
-            </div>
+            <span className="badge">
+              {allGenres.length} {allGenres.length === 1 ? 'Genre' : 'Genres'}
+            </span>
           </SectionTitle>
 
           <GenreBarList>
-            {displayedGenres && displayedGenres.length > 0 ? (
-              displayedGenres.map((g, index) => {
+            {allGenres.length > 0 ? (
+              allGenres.map((g) => {
                 const percentage =
                   totalSongs > 0 ? Math.round((g.count / totalSongs) * 100) : 0;
                 return (
                   <GenreBarItem key={g.genre}>
                     <div className="bar-info">
-                      <span className="genre-name">
-                        <RankBadge rank={index + 1}>{index + 1}</RankBadge>
-                        {g.genre}
-                      </span>
+                      <span className="genre-name">{g.genre}</span>
                       <span className="genre-count">
-                        <strong>{g.count}</strong> tracks ({percentage}%)
+                        <strong>{g.count}</strong> {g.count === 1 ? 'track' : 'tracks'} ({percentage}%)
                       </span>
                     </div>
                     <div className="progress-track">
@@ -656,27 +606,16 @@ export const StatisticsDashboard: React.FC = () => {
           </GenreBarList>
         </SectionCard>
 
-        {/* Top 10 Artists Leaderboard */}
+        {/* Top 10 Artists by Song Count */}
         <SectionCard>
           <SectionTitle>
             <h3>
               <Users size={18} color={theme.colors.cyan} />
-              {artistViewMode === 'top10' ? 'Top 10 Artists by Song Count' : 'All Artists'}
+              Top 10 Artists by Song Count
             </h3>
-            <div className="controls-group">
-              <ViewToggleBtn
-                active={artistViewMode === 'top10'}
-                onClick={() => setArtistViewMode('top10')}
-              >
-                Top 10
-              </ViewToggleBtn>
-              <ViewToggleBtn
-                active={artistViewMode === 'all'}
-                onClick={() => setArtistViewMode('all')}
-              >
-                All ({statistics?.songsByArtist?.length ?? 0})
-              </ViewToggleBtn>
-            </div>
+            <span className="badge">
+              Top {top10Artists.length}
+            </span>
           </SectionTitle>
 
           <TableWrapper>
@@ -689,18 +628,18 @@ export const StatisticsDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayedArtists && displayedArtists.length > 0 ? (
-                  displayedArtists.map((a, idx) => (
+                {top10Artists.length > 0 ? (
+                  top10Artists.map((a, idx) => (
                     <tr key={a.artist}>
                       <td className="primary-cell">
                         <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
                         {a.artist}
                       </td>
                       <td>
-                        <CountChip variant="pink">{a.songCount} songs</CountChip>
+                        <CountChip variant="pink">{a.songCount} {a.songCount === 1 ? 'song' : 'songs'}</CountChip>
                       </td>
                       <td>
-                        <CountChip variant="cyan">{a.albumCount} albums</CountChip>
+                        <CountChip variant="cyan">{a.albumCount} {a.albumCount === 1 ? 'album' : 'albums'}</CountChip>
                       </td>
                     </tr>
                   ))
@@ -720,27 +659,16 @@ export const StatisticsDashboard: React.FC = () => {
         </SectionCard>
       </ContentSplitGrid>
 
-      {/* Top 10 Albums Leaderboard */}
+      {/* Top 10 Albums by Track Count */}
       <SectionCard>
         <SectionTitle>
           <h3>
             <ListMusic size={18} color={theme.colors.amber} />
-            {albumViewMode === 'top10' ? 'Top 10 Albums by Track Count' : 'All Albums in Catalog'}
+            Top 10 Albums by Track Count
           </h3>
-          <div className="controls-group">
-            <ViewToggleBtn
-              active={albumViewMode === 'top10'}
-              onClick={() => setAlbumViewMode('top10')}
-            >
-              Top 10
-            </ViewToggleBtn>
-            <ViewToggleBtn
-              active={albumViewMode === 'all'}
-              onClick={() => setAlbumViewMode('all')}
-            >
-              All ({statistics?.songsByAlbum?.length ?? 0})
-            </ViewToggleBtn>
-          </div>
+          <span className="badge">
+            Top {top10Albums.length}
+          </span>
         </SectionTitle>
 
         <TableWrapper>
@@ -753,8 +681,8 @@ export const StatisticsDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {displayedAlbums && displayedAlbums.length > 0 ? (
-                displayedAlbums.map((albumItem, idx) => (
+              {top10Albums.length > 0 ? (
+                top10Albums.map((albumItem, idx) => (
                   <tr key={`${albumItem.album}-${idx}`}>
                     <td className="primary-cell">
                       <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
