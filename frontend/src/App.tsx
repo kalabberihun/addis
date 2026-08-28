@@ -50,7 +50,7 @@ const App: React.FC = () => {
       <ToastNotification />
 
       <Footer>
-        Addis Software Assessment Project &bull; Full Stack MERN with <span>Redux Toolkit & Saga</span>
+        &copy; {new Date().getFullYear()} Addis Sound. All rights reserved.
       </Footer>
     </AppContainer>
   );

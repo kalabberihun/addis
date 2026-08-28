@@ -56,12 +56,24 @@ const HeroTitle = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
 
   .gradient-text {
     background: ${theme.colors.primaryGradient};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+`;
+
+const SongCountBadge = styled.span`
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: ${theme.radii.full};
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
 `;
 
 const HeroSubtitle = styled.p`
@@ -269,10 +281,12 @@ export const MusicLibrary: React.FC = () => {
         <HeroTitle>
           <span>🎵 Addis</span>
           <span className="gradient-text">Song Collection</span>
+          <SongCountBadge>
+            {songs.length} {songs.length === 1 ? 'Song' : 'Songs'}
+          </SongCountBadge>
         </HeroTitle>
         <HeroSubtitle>
-          Explore, filter, manage, and curate your audio universe. Real-time state
-          management powered by Redux Toolkit & Saga.
+          Explore, filter, manage, and curate your audio universe.
         </HeroSubtitle>
       </HeroBanner>
 

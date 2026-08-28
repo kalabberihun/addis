@@ -147,7 +147,6 @@ export const Navbar: React.FC = () => {
           </div>
           <BrandTitle>
             <h1>Addis Sound</h1>
-            <span>MERN Music Manager</span>
           </BrandTitle>
         </BrandSection>
 
