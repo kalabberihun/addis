@@ -365,29 +365,6 @@ const StyledTable = styled.table`
   }
 `;
 
-const RankBadge = styled.span<{ rank: number }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  font-size: 0.75rem;
-  font-weight: 800;
-  margin-right: 0.5rem;
-  background: ${({ rank }) =>
-    rank === 1
-      ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-      : rank === 2
-      ? 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)'
-      : rank === 3
-      ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)'
-      : 'rgba(255, 255, 255, 0.06)'};
-  color: #ffffff;
-  box-shadow: ${({ rank }) =>
-    rank <= 3 ? '0 0 10px rgba(245, 158, 11, 0.3)' : 'none'};
-`;
-
 const CountChip = styled.span<{ variant?: 'cyan' | 'pink' }>`
   display: inline-block;
   padding: 0.2rem 0.6rem;
@@ -419,11 +396,11 @@ export const StatisticsDashboard: React.FC = () => {
   const topArtist = statistics?.topArtist;
   const topAlbum = statistics?.topAlbum;
 
-  // Top 10 Artists by Song Count
-  const top10Artists = statistics?.songsByArtist?.slice(0, 10) ?? [];
+  // All Artists (sorted by song count descending)
+  const allArtists = statistics?.songsByArtist ?? [];
 
-  // Top 10 Albums by Track Count
-  const top10Albums = statistics?.songsByAlbum?.slice(0, 10) ?? [];
+  // All Albums (sorted by track count descending)
+  const allAlbums = statistics?.songsByAlbum ?? [];
 
   // All Genres
   const allGenres = statistics?.songsByGenre ?? [];
@@ -440,7 +417,7 @@ export const StatisticsDashboard: React.FC = () => {
         </h2>
         <p>
           Real-time aggregates of songs, distinct artists, albums, and genre
-          distributions with Top 10 leaderboards.
+          distributions.
         </p>
       </PageHeader>
 
@@ -606,15 +583,15 @@ export const StatisticsDashboard: React.FC = () => {
           </GenreBarList>
         </SectionCard>
 
-        {/* Top 10 Artists by Song Count */}
+        {/* Artists (Shows ALL Artists) */}
         <SectionCard>
           <SectionTitle>
             <h3>
               <Users size={18} color={theme.colors.cyan} />
-              Top 10 Artists by Song Count
+              Artists
             </h3>
             <span className="badge">
-              Top {top10Artists.length}
+              {allArtists.length} {allArtists.length === 1 ? 'Artist' : 'Artists'}
             </span>
           </SectionTitle>
 
@@ -622,17 +599,16 @@ export const StatisticsDashboard: React.FC = () => {
             <StyledTable>
               <thead>
                 <tr>
-                  <th>Rank & Artist</th>
+                  <th>Artist</th>
                   <th>Songs</th>
                   <th>Albums</th>
                 </tr>
               </thead>
               <tbody>
-                {top10Artists.length > 0 ? (
-                  top10Artists.map((a, idx) => (
+                {allArtists.length > 0 ? (
+                  allArtists.map((a) => (
                     <tr key={a.artist}>
                       <td className="primary-cell">
-                        <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
                         {a.artist}
                       </td>
                       <td>
@@ -659,15 +635,15 @@ export const StatisticsDashboard: React.FC = () => {
         </SectionCard>
       </ContentSplitGrid>
 
-      {/* Top 10 Albums by Track Count */}
+      {/* Albums (Shows ALL Albums) */}
       <SectionCard>
         <SectionTitle>
           <h3>
             <ListMusic size={18} color={theme.colors.amber} />
-            Top 10 Albums by Track Count
+            Albums
           </h3>
           <span className="badge">
-            Top {top10Albums.length}
+            {allAlbums.length} {allAlbums.length === 1 ? 'Album' : 'Albums'}
           </span>
         </SectionTitle>
 
@@ -675,17 +651,16 @@ export const StatisticsDashboard: React.FC = () => {
           <StyledTable>
             <thead>
               <tr>
-                <th>Rank & Album Title</th>
+                <th>Album Title</th>
                 <th>Artist</th>
                 <th>Songs in Album</th>
               </tr>
             </thead>
             <tbody>
-              {top10Albums.length > 0 ? (
-                top10Albums.map((albumItem, idx) => (
+              {allAlbums.length > 0 ? (
+                allAlbums.map((albumItem, idx) => (
                   <tr key={`${albumItem.album}-${idx}`}>
                     <td className="primary-cell">
-                      <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
                       {albumItem.album}
                     </td>
                     <td>{albumItem.artist}</td>
