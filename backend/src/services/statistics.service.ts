@@ -11,6 +11,9 @@ export interface StatisticsResult {
   songsByAlbum: { album: string; artist: string; songCount: number }[];
   topArtist: { artist: string; songCount: number; albumCount: number } | null;
   topAlbum: { album: string; artist: string; songCount: number } | null;
+  top10Artists: { artist: string; songCount: number; albumCount: number }[];
+  top10Albums: { album: string; artist: string; songCount: number }[];
+  top10Genres: { genre: string; count: number }[];
 }
 
 export const getStatistics = async (): Promise<StatisticsResult> => {
@@ -79,6 +82,9 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
 
   const topArtist = songsByArtist.length > 0 ? songsByArtist[0] : null;
   const topAlbum = songsByAlbum.length > 0 ? songsByAlbum[0] : null;
+  const top10Artists = songsByArtist.slice(0, 10);
+  const top10Albums = songsByAlbum.slice(0, 10);
+  const top10Genres = songsByGenre.slice(0, 10);
 
   const stats: StatisticsResult = {
     totalSongs: totalCounts[0]?.totalSongs ?? 0,
@@ -90,6 +96,9 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
     songsByAlbum,
     topArtist,
     topAlbum,
+    top10Artists,
+    top10Albums,
+    top10Genres,
   };
 
   return stats;

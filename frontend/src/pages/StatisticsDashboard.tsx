@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import {
   Music,
@@ -234,7 +234,7 @@ const StatBadge = styled.span<{ variant?: 'amber' | 'pink' | 'cyan' }>`
 
 const ContentSplitGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
   gap: 2rem;
 `;
 
@@ -257,6 +257,8 @@ const SectionTitle = styled.div`
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   padding-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 
   h3 {
     font-size: 1.2rem;
@@ -267,6 +269,12 @@ const SectionTitle = styled.div`
     gap: 0.6rem;
   }
 
+  .controls-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   span.badge {
     font-size: 0.78rem;
     font-weight: 600;
@@ -274,6 +282,26 @@ const SectionTitle = styled.div`
     border-radius: ${theme.radii.full};
     background: rgba(139, 92, 246, 0.15);
     color: #c4b5fd;
+  }
+`;
+
+const ViewToggleBtn = styled.button<{ active: boolean }>`
+  background: ${({ active }) =>
+    active ? 'rgba(139, 92, 246, 0.25)' : 'rgba(255, 255, 255, 0.04)'};
+  border: 1px solid
+    ${({ active }) =>
+      active ? 'rgba(139, 92, 246, 0.45)' : 'rgba(255, 255, 255, 0.08)'};
+  color: ${({ active }) => (active ? '#ffffff' : theme.colors.textMuted)};
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: ${theme.radii.full};
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    color: #ffffff;
+    background: rgba(139, 92, 246, 0.35);
   }
 `;
 
@@ -296,6 +324,9 @@ const GenreBarItem = styled.div`
     .genre-name {
       font-weight: 600;
       color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .genre-count {
@@ -352,15 +383,35 @@ const StyledTable = styled.table`
     &.primary-cell {
       font-weight: 600;
       color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
     }
   }
 
   tr:hover td {
     background: rgba(255, 255, 255, 0.02);
   }
+`;
+
+const RankBadge = styled.span<{ rank: number }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-right: 0.5rem;
+  background: ${({ rank }) =>
+    rank === 1
+      ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+      : rank === 2
+      ? 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)'
+      : rank === 3
+      ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)'
+      : 'rgba(255, 255, 255, 0.06)'};
+  color: #ffffff;
+  box-shadow: ${({ rank }) =>
+    rank <= 3 ? '0 0 10px rgba(245, 158, 11, 0.3)' : 'none'};
 `;
 
 const CountChip = styled.span<{ variant?: 'cyan' | 'pink' }>`
@@ -386,6 +437,10 @@ export const StatisticsDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const { statistics, statsLoading } = useAppSelector((state) => state.songs);
 
+  const [artistViewMode, setArtistViewMode] = useState<'top10' | 'all'>('top10');
+  const [albumViewMode, setAlbumViewMode] = useState<'top10' | 'all'>('top10');
+  const [genreViewMode, setGenreViewMode] = useState<'top10' | 'all'>('top10');
+
   useEffect(() => {
     dispatch(fetchStatisticsRequest());
   }, [dispatch]);
@@ -393,6 +448,21 @@ export const StatisticsDashboard: React.FC = () => {
   const totalSongs = statistics?.totalSongs ?? 0;
   const topArtist = statistics?.topArtist;
   const topAlbum = statistics?.topAlbum;
+
+  const displayedArtists =
+    artistViewMode === 'top10'
+      ? statistics?.songsByArtist?.slice(0, 10) ?? []
+      : statistics?.songsByArtist ?? [];
+
+  const displayedAlbums =
+    albumViewMode === 'top10'
+      ? statistics?.songsByAlbum?.slice(0, 10) ?? []
+      : statistics?.songsByAlbum ?? [];
+
+  const displayedGenres =
+    genreViewMode === 'top10'
+      ? statistics?.songsByGenre?.slice(0, 10) ?? []
+      : statistics?.songsByGenre ?? [];
 
   return (
     <DashboardWrapper className="animate-fade-in">
@@ -406,7 +476,7 @@ export const StatisticsDashboard: React.FC = () => {
         </h2>
         <p>
           Real-time aggregates of songs, distinct artists, albums, genre
-          distributions, and record holders.
+          distributions, and Top 10 leaderboards.
         </p>
       </PageHeader>
 
@@ -465,16 +535,16 @@ export const StatisticsDashboard: React.FC = () => {
         </KpiCard>
       </KpiGrid>
 
-      {/* Top Records Section: Top Artist & Top Album */}
+      {/* Top 1 Highlights Section */}
       <TopHighlightsGrid>
-        {/* Top Artist by Song Count */}
+        {/* Top 1 Artist by Song Count */}
         <HighlightCard
           accentColor="rgba(245, 158, 11, 0.4)"
           bgGlow="linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)"
         >
           <div className="badge-ribbon">
             <Crown size={14} color="#fbbf24" />
-            Top Artist by Song Count
+            #1 Top Artist by Song Count
           </div>
           <div className="content-row">
             <div className="trophy-icon-wrapper">
@@ -486,7 +556,7 @@ export const StatisticsDashboard: React.FC = () => {
               </h4>
               <div className="sub-artist">
                 <Flame size={14} color="#f59e0b" />
-                <span>Leader in catalog tracks</span>
+                <span>Top catalog artist</span>
               </div>
             </div>
           </div>
@@ -500,14 +570,14 @@ export const StatisticsDashboard: React.FC = () => {
           </div>
         </HighlightCard>
 
-        {/* Top Album by Track Count */}
+        {/* Top 1 Album by Track Count */}
         <HighlightCard
           accentColor="rgba(236, 72, 153, 0.4)"
           bgGlow="linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)"
         >
           <div className="badge-ribbon">
             <Trophy size={14} color="#f472b6" />
-            Top Album by Track Count
+            #1 Top Album by Track Count
           </div>
           <div className="content-row">
             <div className="trophy-icon-wrapper">
@@ -532,27 +602,41 @@ export const StatisticsDashboard: React.FC = () => {
       </TopHighlightsGrid>
 
       <ContentSplitGrid>
-        {/* Songs in Every Genre */}
+        {/* Top 10 Genres Breakdown */}
         <SectionCard>
           <SectionTitle>
             <h3>
               <Tags size={18} color={theme.colors.primary} />
-              Songs by Genre
+              {genreViewMode === 'top10' ? 'Top 10 Genres' : 'All Genres'}
             </h3>
-            <span className="badge">
-              {statistics?.songsByGenre?.length ?? 0} Genres
-            </span>
+            <div className="controls-group">
+              <ViewToggleBtn
+                active={genreViewMode === 'top10'}
+                onClick={() => setGenreViewMode('top10')}
+              >
+                Top 10
+              </ViewToggleBtn>
+              <ViewToggleBtn
+                active={genreViewMode === 'all'}
+                onClick={() => setGenreViewMode('all')}
+              >
+                All ({statistics?.songsByGenre?.length ?? 0})
+              </ViewToggleBtn>
+            </div>
           </SectionTitle>
 
           <GenreBarList>
-            {statistics?.songsByGenre && statistics.songsByGenre.length > 0 ? (
-              statistics.songsByGenre.map((g) => {
+            {displayedGenres && displayedGenres.length > 0 ? (
+              displayedGenres.map((g, index) => {
                 const percentage =
                   totalSongs > 0 ? Math.round((g.count / totalSongs) * 100) : 0;
                 return (
                   <GenreBarItem key={g.genre}>
                     <div className="bar-info">
-                      <span className="genre-name">{g.genre}</span>
+                      <span className="genre-name">
+                        <RankBadge rank={index + 1}>{index + 1}</RankBadge>
+                        {g.genre}
+                      </span>
                       <span className="genre-count">
                         <strong>{g.count}</strong> tracks ({percentage}%)
                       </span>
@@ -572,33 +656,44 @@ export const StatisticsDashboard: React.FC = () => {
           </GenreBarList>
         </SectionCard>
 
-        {/* Songs & Albums Each Artist Has */}
+        {/* Top 10 Artists Leaderboard */}
         <SectionCard>
           <SectionTitle>
             <h3>
               <Users size={18} color={theme.colors.cyan} />
-              Artist Breakdown (Sorted by Song Count)
+              {artistViewMode === 'top10' ? 'Top 10 Artists by Song Count' : 'All Artists'}
             </h3>
-            <span className="badge">
-              {statistics?.songsByArtist?.length ?? 0} Artists
-            </span>
+            <div className="controls-group">
+              <ViewToggleBtn
+                active={artistViewMode === 'top10'}
+                onClick={() => setArtistViewMode('top10')}
+              >
+                Top 10
+              </ViewToggleBtn>
+              <ViewToggleBtn
+                active={artistViewMode === 'all'}
+                onClick={() => setArtistViewMode('all')}
+              >
+                All ({statistics?.songsByArtist?.length ?? 0})
+              </ViewToggleBtn>
+            </div>
           </SectionTitle>
 
           <TableWrapper>
             <StyledTable>
               <thead>
                 <tr>
-                  <th>Artist</th>
+                  <th>Rank & Artist</th>
                   <th>Songs</th>
                   <th>Albums</th>
                 </tr>
               </thead>
               <tbody>
-                {statistics?.songsByArtist && statistics.songsByArtist.length > 0 ? (
-                  statistics.songsByArtist.map((a, idx) => (
+                {displayedArtists && displayedArtists.length > 0 ? (
+                  displayedArtists.map((a, idx) => (
                     <tr key={a.artist}>
                       <td className="primary-cell">
-                        {idx === 0 && <Crown size={14} color="#fbbf24" />}
+                        <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
                         {a.artist}
                       </td>
                       <td>
@@ -625,33 +720,44 @@ export const StatisticsDashboard: React.FC = () => {
         </SectionCard>
       </ContentSplitGrid>
 
-      {/* Songs in Each Album */}
+      {/* Top 10 Albums Leaderboard */}
       <SectionCard>
         <SectionTitle>
           <h3>
             <ListMusic size={18} color={theme.colors.amber} />
-            Songs in Each Album (Sorted by Track Count)
+            {albumViewMode === 'top10' ? 'Top 10 Albums by Track Count' : 'All Albums in Catalog'}
           </h3>
-          <span className="badge">
-            {statistics?.songsByAlbum?.length ?? 0} Albums
-          </span>
+          <div className="controls-group">
+            <ViewToggleBtn
+              active={albumViewMode === 'top10'}
+              onClick={() => setAlbumViewMode('top10')}
+            >
+              Top 10
+            </ViewToggleBtn>
+            <ViewToggleBtn
+              active={albumViewMode === 'all'}
+              onClick={() => setAlbumViewMode('all')}
+            >
+              All ({statistics?.songsByAlbum?.length ?? 0})
+            </ViewToggleBtn>
+          </div>
         </SectionTitle>
 
         <TableWrapper>
           <StyledTable>
             <thead>
               <tr>
-                <th>Album Title</th>
+                <th>Rank & Album Title</th>
                 <th>Artist</th>
                 <th>Songs in Album</th>
               </tr>
             </thead>
             <tbody>
-              {statistics?.songsByAlbum && statistics.songsByAlbum.length > 0 ? (
-                statistics.songsByAlbum.map((albumItem, idx) => (
+              {displayedAlbums && displayedAlbums.length > 0 ? (
+                displayedAlbums.map((albumItem, idx) => (
                   <tr key={`${albumItem.album}-${idx}`}>
                     <td className="primary-cell">
-                      {idx === 0 && <Trophy size={14} color="#f472b6" />}
+                      <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
                       {albumItem.album}
                     </td>
                     <td>{albumItem.artist}</td>
