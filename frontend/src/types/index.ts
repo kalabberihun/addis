@@ -40,6 +40,8 @@ export interface StatisticsResult {
   songsByGenre: GenreStat[];
   songsByArtist: ArtistStat[];
   songsByAlbum: AlbumStat[];
+  topArtist?: ArtistStat | null;
+  topAlbum?: AlbumStat | null;
 }
 
 export interface SongsFilter {

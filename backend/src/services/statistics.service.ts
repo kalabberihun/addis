@@ -9,6 +9,8 @@ export interface StatisticsResult {
   songsByGenre: { genre: string; count: number }[];
   songsByArtist: { artist: string; songCount: number; albumCount: number }[];
   songsByAlbum: { album: string; artist: string; songCount: number }[];
+  topArtist: { artist: string; songCount: number; albumCount: number } | null;
+  topAlbum: { album: string; artist: string; songCount: number } | null;
 }
 
 export const getStatistics = async (): Promise<StatisticsResult> => {
@@ -34,14 +36,14 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
     },
   ]);
 
-  // songs by genre
+  // songs by genre (sorted by count descending, then genre name)
   const songsByGenre = await Song.aggregate([
     { $group: { _id: '$genre', count: { $sum: 1 } } },
     { $project: { _id: 0, genre: '$_id', count: 1 } },
-    { $sort: { genre: 1 } },
+    { $sort: { count: -1, genre: 1 } },
   ]);
 
-  // songs by artist with album count
+  // songs by artist with album count (sorted by song count descending)
   const songsByArtist = await Song.aggregate([
     {
       $group: {
@@ -58,10 +60,10 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
         albumCount: { $size: '$albums' },
       },
     },
-    { $sort: { artist: 1 } },
+    { $sort: { songCount: -1, artist: 1 } },
   ]);
 
-  // songs by album with artist reference
+  // songs by album with artist reference (sorted by track count descending)
   const songsByAlbum = await Song.aggregate([
     { $group: { _id: { album: '$album', artist: '$artist' }, songCount: { $sum: 1 } } },
     {
@@ -72,8 +74,11 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
         songCount: 1,
       },
     },
-    { $sort: { album: 1 } },
+    { $sort: { songCount: -1, album: 1 } },
   ]);
+
+  const topArtist = songsByArtist.length > 0 ? songsByArtist[0] : null;
+  const topAlbum = songsByAlbum.length > 0 ? songsByAlbum[0] : null;
 
   const stats: StatisticsResult = {
     totalSongs: totalCounts[0]?.totalSongs ?? 0,
@@ -83,6 +88,8 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
     songsByGenre,
     songsByArtist,
     songsByAlbum,
+    topArtist,
+    topAlbum,
   };
 
   return stats;

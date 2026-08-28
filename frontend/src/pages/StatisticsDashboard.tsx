@@ -8,6 +8,10 @@ import {
   BarChart2,
   ListMusic,
   Loader2,
+  Crown,
+  Trophy,
+  Flame,
+  Sparkles,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store';
 import { fetchStatisticsRequest } from '../store/songsSlice';
@@ -101,6 +105,131 @@ const KpiCard = styled.div<{ gradient: string; glow: string }>`
       line-height: 1.2;
     }
   }
+`;
+
+/* Highlights / Top Record Cards */
+const TopHighlightsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1.5rem;
+`;
+
+const HighlightCard = styled.div<{ accentColor: string; bgGlow: string }>`
+  background: linear-gradient(
+    135deg,
+    rgba(25, 30, 50, 0.85) 0%,
+    rgba(14, 18, 32, 0.95) 100%
+  );
+  border: 1px solid ${({ accentColor }) => accentColor};
+  border-radius: ${theme.radii.lg};
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4), ${({ bgGlow }) => bgGlow};
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  .badge-ribbon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.75rem;
+    border-radius: ${theme.radii.full};
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    width: fit-content;
+  }
+
+  .content-row {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .trophy-icon-wrapper {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    background: ${({ bgGlow }) => bgGlow};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .leader-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+
+    h4 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sub-artist {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: ${theme.colors.textMuted};
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+  }
+
+  .stats-pills-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.25rem;
+    flex-wrap: wrap;
+  }
+`;
+
+const StatBadge = styled.span<{ variant?: 'amber' | 'pink' | 'cyan' }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: ${theme.radii.full};
+  font-size: 0.84rem;
+  font-weight: 700;
+  background: ${({ variant }) =>
+    variant === 'amber'
+      ? 'rgba(245, 158, 11, 0.2)'
+      : variant === 'pink'
+      ? 'rgba(236, 72, 153, 0.2)'
+      : 'rgba(6, 182, 212, 0.2)'};
+  color: ${({ variant }) =>
+    variant === 'amber'
+      ? '#fbbf24'
+      : variant === 'pink'
+      ? '#f472b6'
+      : '#22d3ee'};
+  border: 1px solid
+    ${({ variant }) =>
+      variant === 'amber'
+        ? 'rgba(245, 158, 11, 0.4)'
+        : variant === 'pink'
+        ? 'rgba(236, 72, 153, 0.4)'
+        : 'rgba(6, 182, 212, 0.4)'};
 `;
 
 const ContentSplitGrid = styled.div`
@@ -223,6 +352,9 @@ const StyledTable = styled.table`
     &.primary-cell {
       font-weight: 600;
       color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
   }
 
@@ -259,6 +391,8 @@ export const StatisticsDashboard: React.FC = () => {
   }, [dispatch]);
 
   const totalSongs = statistics?.totalSongs ?? 0;
+  const topArtist = statistics?.topArtist;
+  const topAlbum = statistics?.topAlbum;
 
   return (
     <DashboardWrapper className="animate-fade-in">
@@ -266,15 +400,17 @@ export const StatisticsDashboard: React.FC = () => {
         <h2>
           <BarChart2 size={32} color={theme.colors.cyan} />
           <span>Catalog Analytics & Insights</span>
-          {statsLoading && <Loader2 size={20} className="animate-spin" color={theme.colors.primary} />}
+          {statsLoading && (
+            <Loader2 size={20} className="animate-spin" color={theme.colors.primary} />
+          )}
         </h2>
         <p>
-          Real-time aggregates of songs, distinct artists, albums, and genre
-          distributions.
+          Real-time aggregates of songs, distinct artists, albums, genre
+          distributions, and record holders.
         </p>
       </PageHeader>
 
-      {/* KPI Cards Grid */}
+      {/* KPI Overview Grid */}
       <KpiGrid>
         <KpiCard
           gradient={theme.colors.primaryGradient}
@@ -329,6 +465,72 @@ export const StatisticsDashboard: React.FC = () => {
         </KpiCard>
       </KpiGrid>
 
+      {/* Top Records Section: Top Artist & Top Album */}
+      <TopHighlightsGrid>
+        {/* Top Artist by Song Count */}
+        <HighlightCard
+          accentColor="rgba(245, 158, 11, 0.4)"
+          bgGlow="linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)"
+        >
+          <div className="badge-ribbon">
+            <Crown size={14} color="#fbbf24" />
+            Top Artist by Song Count
+          </div>
+          <div className="content-row">
+            <div className="trophy-icon-wrapper">
+              <Crown size={32} />
+            </div>
+            <div className="leader-details">
+              <h4 title={topArtist?.artist || 'No artist data'}>
+                {topArtist ? topArtist.artist : 'N/A'}
+              </h4>
+              <div className="sub-artist">
+                <Flame size={14} color="#f59e0b" />
+                <span>Leader in catalog tracks</span>
+              </div>
+            </div>
+          </div>
+          <div className="stats-pills-row">
+            <StatBadge variant="amber">
+              <Music size={13} /> {topArtist?.songCount ?? 0} Songs
+            </StatBadge>
+            <StatBadge variant="cyan">
+              <Disc size={13} /> {topArtist?.albumCount ?? 0} Albums
+            </StatBadge>
+          </div>
+        </HighlightCard>
+
+        {/* Top Album by Track Count */}
+        <HighlightCard
+          accentColor="rgba(236, 72, 153, 0.4)"
+          bgGlow="linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)"
+        >
+          <div className="badge-ribbon">
+            <Trophy size={14} color="#f472b6" />
+            Top Album by Track Count
+          </div>
+          <div className="content-row">
+            <div className="trophy-icon-wrapper">
+              <Disc size={32} />
+            </div>
+            <div className="leader-details">
+              <h4 title={topAlbum?.album || 'No album data'}>
+                {topAlbum ? topAlbum.album : 'N/A'}
+              </h4>
+              <div className="sub-artist">
+                <Users size={14} color="#ec4899" />
+                <span>by {topAlbum ? topAlbum.artist : 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+          <div className="stats-pills-row">
+            <StatBadge variant="pink">
+              <Sparkles size={13} /> {topAlbum?.songCount ?? 0} Tracks in Album
+            </StatBadge>
+          </div>
+        </HighlightCard>
+      </TopHighlightsGrid>
+
       <ContentSplitGrid>
         {/* Songs in Every Genre */}
         <SectionCard>
@@ -375,7 +577,7 @@ export const StatisticsDashboard: React.FC = () => {
           <SectionTitle>
             <h3>
               <Users size={18} color={theme.colors.cyan} />
-              Artist Breakdown
+              Artist Breakdown (Sorted by Song Count)
             </h3>
             <span className="badge">
               {statistics?.songsByArtist?.length ?? 0} Artists
@@ -393,9 +595,12 @@ export const StatisticsDashboard: React.FC = () => {
               </thead>
               <tbody>
                 {statistics?.songsByArtist && statistics.songsByArtist.length > 0 ? (
-                  statistics.songsByArtist.map((a) => (
+                  statistics.songsByArtist.map((a, idx) => (
                     <tr key={a.artist}>
-                      <td className="primary-cell">{a.artist}</td>
+                      <td className="primary-cell">
+                        {idx === 0 && <Crown size={14} color="#fbbf24" />}
+                        {a.artist}
+                      </td>
                       <td>
                         <CountChip variant="pink">{a.songCount} songs</CountChip>
                       </td>
@@ -406,7 +611,10 @@ export const StatisticsDashboard: React.FC = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', color: theme.colors.textDim }}>
+                    <td
+                      colSpan={3}
+                      style={{ textAlign: 'center', color: theme.colors.textDim }}
+                    >
                       No artist data yet.
                     </td>
                   </tr>
@@ -422,7 +630,7 @@ export const StatisticsDashboard: React.FC = () => {
         <SectionTitle>
           <h3>
             <ListMusic size={18} color={theme.colors.amber} />
-            Songs in Each Album
+            Songs in Each Album (Sorted by Track Count)
           </h3>
           <span className="badge">
             {statistics?.songsByAlbum?.length ?? 0} Albums
@@ -442,18 +650,25 @@ export const StatisticsDashboard: React.FC = () => {
               {statistics?.songsByAlbum && statistics.songsByAlbum.length > 0 ? (
                 statistics.songsByAlbum.map((albumItem, idx) => (
                   <tr key={`${albumItem.album}-${idx}`}>
-                    <td className="primary-cell">{albumItem.album}</td>
+                    <td className="primary-cell">
+                      {idx === 0 && <Trophy size={14} color="#f472b6" />}
+                      {albumItem.album}
+                    </td>
                     <td>{albumItem.artist}</td>
                     <td>
                       <CountChip variant="cyan">
-                        {albumItem.songCount} {albumItem.songCount === 1 ? 'track' : 'tracks'}
+                        {albumItem.songCount}{' '}
+                        {albumItem.songCount === 1 ? 'track' : 'tracks'}
                       </CountChip>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} style={{ textAlign: 'center', color: theme.colors.textDim }}>
+                  <td
+                    colSpan={3}
+                    style={{ textAlign: 'center', color: theme.colors.textDim }}
+                  >
                     No album data available.
                   </td>
                 </tr>
