@@ -8,7 +8,9 @@ class AppError extends Error {
         this.isOperational = true;
         // Set the prototype explicitly.
         Object.setPrototypeOf(this, new.target.prototype);
-        Error.captureStackTrace(this, this.constructor);
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, this.constructor);
+        }
     }
 }
 exports.AppError = AppError;

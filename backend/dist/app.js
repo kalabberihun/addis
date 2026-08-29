@@ -8,7 +8,6 @@ const cors_1 = __importDefault(require("cors"));
 const song_routes_1 = __importDefault(require("./routes/song.routes"));
 const statistics_routes_1 = __importDefault(require("./routes/statistics.routes"));
 const error_middleware_1 = require("./middleware/error.middleware");
-const error_middleware_2 = require("./middleware/error.middleware");
 const app = (0, express_1.default)();
 // Middleware
 app.use((0, cors_1.default)());
@@ -18,7 +17,7 @@ app.use('/api/songs', song_routes_1.default);
 app.use('/api/statistics', statistics_routes_1.default);
 // 404 handler for unmatched routes
 app.use((_req, _res, next) => {
-    next(new error_middleware_2.AppError('Not Found', 404));
+    next(new error_middleware_1.AppError('Not Found', 404));
 });
 // Global error handler (must be last)
 app.use(error_middleware_1.errorHandler);

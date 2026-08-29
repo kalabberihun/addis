@@ -1,9 +1,8 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import songRouter from './routes/song.routes';
 import statsRouter from './routes/statistics.routes';
-import { errorHandler } from './middleware/error.middleware';
-import { AppError } from './middleware/error.middleware';
+import { errorHandler, AppError } from './middleware/error.middleware';
 
 const app = express();
 
@@ -16,7 +15,7 @@ app.use('/api/songs', songRouter);
 app.use('/api/statistics', statsRouter);
 
 // 404 handler for unmatched routes
-app.use((_req, _res, next) => {
+app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(new AppError('Not Found', 404));
 });
 
