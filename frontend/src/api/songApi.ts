@@ -1,8 +1,22 @@
 import axios from 'axios';
 import { Song, SongInput, StatisticsResult } from '../types';
 
+const getBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) {
+    return '/api';
+  }
+
+  let cleanUrl = envUrl.trim().replace(/\/+$/, '');
+  // If user entered a full URL without /api (e.g. https://backend.onrender.com), append /api
+  if (cleanUrl.startsWith('http') && !cleanUrl.endsWith('/api')) {
+    cleanUrl = `${cleanUrl}/api`;
+  }
+  return cleanUrl;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },

@@ -10,11 +10,17 @@ const statistics_routes_1 = __importDefault(require("./routes/statistics.routes"
 const error_middleware_1 = require("./middleware/error.middleware");
 const app = (0, express_1.default)();
 // Middleware
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({ origin: '*' }));
 app.use(express_1.default.json());
-// Routes
+// Routes (supports both /api/songs and /songs)
 app.use('/api/songs', song_routes_1.default);
+app.use('/songs', song_routes_1.default);
 app.use('/api/statistics', statistics_routes_1.default);
+app.use('/statistics', statistics_routes_1.default);
+// Health check endpoint for Render
+app.get('/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 // 404 handler for unmatched routes
 app.use((_req, _res, next) => {
     next(new error_middleware_1.AppError('Not Found', 404));
