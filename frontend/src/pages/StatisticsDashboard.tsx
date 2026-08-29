@@ -283,6 +283,24 @@ const GenreBarList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: ${theme.radii.full};
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.35);
+    border-radius: ${theme.radii.full};
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.6);
+  }
 `;
 
 const GenreBarItem = styled.div`
@@ -328,6 +346,25 @@ const GenreBarItem = styled.div`
 
 const TableWrapper = styled.div`
   overflow-x: auto;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: ${theme.radii.full};
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(6, 182, 212, 0.35);
+    border-radius: ${theme.radii.full};
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.6);
+  }
 `;
 
 const StyledTable = styled.table`
@@ -344,6 +381,11 @@ const StyledTable = styled.table`
     letter-spacing: 0.05em;
     color: ${theme.colors.textDim};
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: sticky;
+    top: 0;
+    background: rgba(18, 24, 38, 0.96);
+    backdrop-filter: blur(12px);
+    z-index: 2;
   }
 
   td {
