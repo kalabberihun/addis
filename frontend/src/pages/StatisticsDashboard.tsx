@@ -21,7 +21,7 @@ const DashboardWrapper = styled.div`
   padding: 2rem 1.5rem 5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2.25rem;
 `;
 
 const PageHeader = styled.div`
@@ -47,7 +47,7 @@ const PageHeader = styled.div`
 const KpiGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
+  gap: 1.25rem;
 `;
 
 const KpiCard = styled.div<{ gradient: string; glow: string }>`
@@ -56,31 +56,31 @@ const KpiCard = styled.div<{ gradient: string; glow: string }>`
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid ${theme.colors.cardBorder};
   border-radius: ${theme.radii.lg};
-  padding: 1.5rem;
+  padding: 1.35rem 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.2rem;
   box-shadow: ${theme.shadows.card};
   position: relative;
   overflow: hidden;
   transition: all ${theme.transitions.normal};
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: rgba(255, 255, 255, 0.15);
     box-shadow: ${({ glow }) => glow};
   }
 
   .icon-container {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
     background: ${({ gradient }) => gradient};
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
     flex-shrink: 0;
   }
 
@@ -89,7 +89,7 @@ const KpiCard = styled.div<{ gradient: string; glow: string }>`
     flex-direction: column;
 
     span.label {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -97,7 +97,7 @@ const KpiCard = styled.div<{ gradient: string; glow: string }>`
     }
 
     span.value {
-      font-size: 1.9rem;
+      font-size: 1.8rem;
       font-weight: 800;
       color: #ffffff;
       line-height: 1.2;
@@ -105,11 +105,11 @@ const KpiCard = styled.div<{ gradient: string; glow: string }>`
   }
 `;
 
-/* Highlights / Top 3 Podium Cards */
+/* Compact Highlights / Top 3 Podium Cards (3-Column Layout) */
 const TopHighlightsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1.15rem;
 `;
 
 const HighlightCard = styled.div<{ accentColor: string; bgGlow: string }>`
@@ -119,42 +119,42 @@ const HighlightCard = styled.div<{ accentColor: string; bgGlow: string }>`
     rgba(14, 18, 32, 0.95) 100%
   );
   border: 1px solid ${({ accentColor }) => accentColor};
-  border-radius: ${theme.radii.lg};
-  padding: 1.5rem 1.75rem;
+  border-radius: ${theme.radii.md};
+  padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 0.85rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4), ${({ bgGlow }) => bgGlow};
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35), ${({ bgGlow }) => bgGlow};
   transition: all ${theme.transitions.normal};
 
   &:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 
   .card-header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.6rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
     .badge-ribbon {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      font-size: 0.82rem;
+      gap: 0.35rem;
+      font-size: 0.8rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: #ffffff;
     }
 
     span.podium-tag {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      padding: 0.2rem 0.55rem;
+      padding: 0.15rem 0.45rem;
       border-radius: ${theme.radii.full};
       background: rgba(255, 255, 255, 0.08);
       color: ${theme.colors.textMuted};
@@ -166,16 +166,16 @@ const HighlightCard = styled.div<{ accentColor: string; bgGlow: string }>`
 const Top3List = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.5rem;
 `;
 
 const Top3Item = styled.div<{ rank: number }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.7rem 0.9rem;
-  border-radius: ${theme.radii.md};
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: ${theme.radii.sm};
   background: ${({ rank }) =>
     rank === 1
       ? 'rgba(245, 158, 11, 0.08)'
@@ -185,21 +185,21 @@ const Top3Item = styled.div<{ rank: number }>`
   border: 1px solid
     ${({ rank }) =>
       rank === 1
-        ? 'rgba(245, 158, 11, 0.35)'
+        ? 'rgba(245, 158, 11, 0.3)'
         : rank === 2
-        ? 'rgba(148, 163, 184, 0.25)'
-        : 'rgba(217, 119, 6, 0.2)'};
+        ? 'rgba(148, 163, 184, 0.2)'
+        : 'rgba(217, 119, 6, 0.15)'};
   transition: all ${theme.transitions.fast};
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
-    transform: translateX(3px);
+    transform: translateX(2px);
   }
 
   .left-info {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.55rem;
     min-width: 0;
 
     .titles {
@@ -208,7 +208,7 @@ const Top3Item = styled.div<{ rank: number }>`
       min-width: 0;
 
       .main-title {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 700;
         color: #ffffff;
         white-space: nowrap;
@@ -217,7 +217,7 @@ const Top3Item = styled.div<{ rank: number }>`
       }
 
       .sub-title {
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         color: ${theme.colors.textMuted};
         white-space: nowrap;
         overflow: hidden;
@@ -229,7 +229,7 @@ const Top3Item = styled.div<{ rank: number }>`
   .right-badges {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     flex-shrink: 0;
   }
 `;
@@ -413,12 +413,12 @@ const RankBadge = styled.span<{ rank: number }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  margin-right: 0.5rem;
+  margin-right: 0.35rem;
   flex-shrink: 0;
   background: ${({ rank }) =>
     rank === 1
@@ -430,15 +430,15 @@ const RankBadge = styled.span<{ rank: number }>`
       : 'rgba(255, 255, 255, 0.06)'};
   color: #ffffff;
   box-shadow: ${({ rank }) =>
-    rank <= 3 ? '0 0 10px rgba(245, 158, 11, 0.3)' : 'none'};
+    rank <= 3 ? '0 0 8px rgba(245, 158, 11, 0.3)' : 'none'};
 `;
 
 const CountChip = styled.span<{ variant?: 'cyan' | 'pink' | 'amber' }>`
   display: inline-block;
-  padding: 0.2rem 0.6rem;
+  padding: 0.15rem 0.5rem;
   border-radius: ${theme.radii.full};
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   background: ${({ variant }) =>
     variant === 'pink'
       ? 'rgba(236, 72, 153, 0.15)'
@@ -476,6 +476,9 @@ export const StatisticsDashboard: React.FC = () => {
   // Top 3 Albums by Track Count
   const top3Albums = statistics?.songsByAlbum?.slice(0, 3) ?? [];
 
+  // Top 3 Genres by Song Count
+  const top3Genres = statistics?.songsByGenre?.slice(0, 3) ?? [];
+
   // All Artists (sorted by song count descending)
   const allArtists = statistics?.songsByArtist ?? [];
 
@@ -508,7 +511,7 @@ export const StatisticsDashboard: React.FC = () => {
           glow="0 10px 30px rgba(139, 92, 246, 0.35)"
         >
           <div className="icon-container">
-            <Music size={28} />
+            <Music size={26} />
           </div>
           <div className="details">
             <span className="label">Total Songs</span>
@@ -521,7 +524,7 @@ export const StatisticsDashboard: React.FC = () => {
           glow="0 10px 30px rgba(6, 182, 212, 0.35)"
         >
           <div className="icon-container">
-            <Users size={28} />
+            <Users size={26} />
           </div>
           <div className="details">
             <span className="label">Total Artists</span>
@@ -534,7 +537,7 @@ export const StatisticsDashboard: React.FC = () => {
           glow="0 10px 30px rgba(245, 158, 11, 0.35)"
         >
           <div className="icon-container">
-            <Disc size={28} />
+            <Disc size={26} />
           </div>
           <div className="details">
             <span className="label">Total Albums</span>
@@ -547,7 +550,7 @@ export const StatisticsDashboard: React.FC = () => {
           glow="0 10px 30px rgba(16, 185, 129, 0.35)"
         >
           <div className="icon-container">
-            <Tags size={28} />
+            <Tags size={26} />
           </div>
           <div className="details">
             <span className="label">Total Genres</span>
@@ -556,17 +559,17 @@ export const StatisticsDashboard: React.FC = () => {
         </KpiCard>
       </KpiGrid>
 
-      {/* Top 3 Artists & Top 3 Albums Podium Showcase */}
+      {/* Top 3 Showcases (Artists, Albums, Genres Side-by-Side) */}
       <TopHighlightsGrid>
-        {/* Top 3 Artists by Song Count */}
+        {/* Top 3 Artists */}
         <HighlightCard
           accentColor="rgba(245, 158, 11, 0.4)"
           bgGlow="linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%)"
         >
           <div className="card-header-row">
             <div className="badge-ribbon">
-              <Crown size={17} color="#fbbf24" />
-              <span>Top 3 Artists (by Song Count)</span>
+              <Crown size={16} color="#fbbf24" />
+              <span>Top 3 Artists</span>
             </div>
             <span className="podium-tag">Podium</span>
           </div>
@@ -582,7 +585,7 @@ export const StatisticsDashboard: React.FC = () => {
                         {artistItem.artist}
                       </span>
                       <span className="sub-title">
-                        {artistItem.albumCount} {artistItem.albumCount === 1 ? 'Album' : 'Albums'} in catalog
+                        {artistItem.albumCount} {artistItem.albumCount === 1 ? 'Album' : 'Albums'}
                       </span>
                     </div>
                   </div>
@@ -594,20 +597,20 @@ export const StatisticsDashboard: React.FC = () => {
                 </Top3Item>
               ))
             ) : (
-              <p style={{ color: theme.colors.textDim, fontSize: '0.88rem' }}>No artist data available.</p>
+              <p style={{ color: theme.colors.textDim, fontSize: '0.85rem' }}>No artist data available.</p>
             )}
           </Top3List>
         </HighlightCard>
 
-        {/* Top 3 Albums by Track Count */}
+        {/* Top 3 Albums */}
         <HighlightCard
           accentColor="rgba(236, 72, 153, 0.4)"
           bgGlow="linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)"
         >
           <div className="card-header-row">
             <div className="badge-ribbon">
-              <Trophy size={17} color="#f472b6" />
-              <span>Top 3 Albums (by Track Count)</span>
+              <Trophy size={16} color="#f472b6" />
+              <span>Top 3 Albums</span>
             </div>
             <span className="podium-tag">Podium</span>
           </div>
@@ -635,7 +638,52 @@ export const StatisticsDashboard: React.FC = () => {
                 </Top3Item>
               ))
             ) : (
-              <p style={{ color: theme.colors.textDim, fontSize: '0.88rem' }}>No album data available.</p>
+              <p style={{ color: theme.colors.textDim, fontSize: '0.85rem' }}>No album data available.</p>
+            )}
+          </Top3List>
+        </HighlightCard>
+
+        {/* Top 3 Genres */}
+        <HighlightCard
+          accentColor="rgba(139, 92, 246, 0.4)"
+          bgGlow="linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%)"
+        >
+          <div className="card-header-row">
+            <div className="badge-ribbon">
+              <Tags size={16} color="#c4b5fd" />
+              <span>Top 3 Genres</span>
+            </div>
+            <span className="podium-tag">Podium</span>
+          </div>
+
+          <Top3List>
+            {top3Genres.length > 0 ? (
+              top3Genres.map((genreItem, idx) => {
+                const percentage =
+                  totalSongs > 0 ? Math.round((genreItem.count / totalSongs) * 100) : 0;
+                return (
+                  <Top3Item key={genreItem.genre} rank={idx + 1}>
+                    <div className="left-info">
+                      <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
+                      <div className="titles">
+                        <span className="main-title" title={genreItem.genre}>
+                          {genreItem.genre}
+                        </span>
+                        <span className="sub-title">
+                          {percentage}% of catalog
+                        </span>
+                      </div>
+                    </div>
+                    <div className="right-badges">
+                      <CountChip variant="cyan">
+                        {genreItem.count} {genreItem.count === 1 ? 'Track' : 'Tracks'}
+                      </CountChip>
+                    </div>
+                  </Top3Item>
+                );
+              })
+            ) : (
+              <p style={{ color: theme.colors.textDim, fontSize: '0.85rem' }}>No genre data available.</p>
             )}
           </Top3List>
         </HighlightCard>
