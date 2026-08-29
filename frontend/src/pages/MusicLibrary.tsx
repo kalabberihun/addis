@@ -6,12 +6,19 @@ import {
   Music4,
   Sparkles,
   Loader2,
+  LayoutGrid,
+  List,
+  Edit2,
+  Trash2,
+  Disc3,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store';
 import {
   fetchSongsRequest,
   fetchStatisticsRequest,
   openCreateModal,
+  openEditModal,
+  setDeletingSongId,
   createSongRequest,
 } from '../store/songsSlice';
 import { SongCard } from '../components/SongCard';
@@ -127,6 +134,13 @@ const SearchInputWrapper = styled.div`
   }
 `;
 
+const RightControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+`;
+
 const SortSelect = styled.select`
   background: rgba(18, 24, 38, 0.8);
   border: 1px solid ${theme.colors.cardBorder};
@@ -149,10 +163,155 @@ const SortSelect = styled.select`
   }
 `;
 
+const ViewToggleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  background: rgba(18, 24, 38, 0.8);
+  border: 1px solid ${theme.colors.cardBorder};
+  border-radius: ${theme.radii.full};
+  padding: 0.25rem;
+  gap: 0.2rem;
+`;
+
+const ViewToggleButton = styled.button<{ active: boolean }>`
+  background: ${({ active }) =>
+    active ? 'rgba(139, 92, 246, 0.25)' : 'transparent'};
+  color: ${({ active }) => (active ? '#ffffff' : theme.colors.textDim)};
+  border: ${({ active }) =>
+    active ? '1px solid rgba(139, 92, 246, 0.45)' : '1px solid transparent'};
+  border-radius: ${theme.radii.full};
+  padding: 0.45rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+  box-shadow: ${({ active }) =>
+    active ? '0 0 10px rgba(139, 92, 246, 0.3)' : 'none'};
+
+  &:hover {
+    color: #ffffff;
+    background: ${({ active }) =>
+      active ? 'rgba(139, 92, 246, 0.35)' : 'rgba(255, 255, 255, 0.05)'};
+  }
+`;
+
 const SongsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
+`;
+
+/* Table / Compact List View Styling */
+const TableContainer = styled.div`
+  background: ${theme.colors.cardBg};
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid ${theme.colors.cardBorder};
+  border-radius: ${theme.radii.lg};
+  overflow-x: auto;
+  box-shadow: ${theme.shadows.card};
+`;
+
+const SongTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+
+  th {
+    padding: 0.95rem 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: ${theme.colors.textDim};
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(18, 24, 38, 0.6);
+  }
+
+  td {
+    padding: 0.9rem 1.25rem;
+    color: ${theme.colors.textMuted};
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+  }
+`;
+
+const SongTitleCell = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  .mini-disc {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2a2040 0%, #151a2e 100%);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c4b5fd;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .title-text {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.94rem;
+  }
+`;
+
+const GenreTag = styled.span`
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: ${theme.radii.full};
+  font-size: 0.76rem;
+  font-weight: 700;
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+`;
+
+const ActionsCell = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+`;
+
+const TableActionBtn = styled.button<{ danger?: boolean }>`
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid
+    ${({ danger }) =>
+      danger ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
+  background: ${({ danger }) =>
+    danger ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255, 255, 255, 0.04)'};
+  color: ${({ danger }) => (danger ? '#f87171' : theme.colors.textMuted)};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    color: #ffffff;
+    background: ${({ danger }) =>
+      danger ? 'rgba(239, 68, 68, 0.35)' : 'rgba(139, 92, 246, 0.3)'};
+    border-color: ${({ danger }) =>
+      danger ? '#ef4444' : 'rgba(139, 92, 246, 0.6)'};
+    transform: translateY(-1px);
+  }
 `;
 
 const EmptyStateContainer = styled.div`
@@ -238,11 +397,19 @@ export const MusicLibrary: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'title' | 'artist' | 'album'>('newest');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('addis_song_view_mode') as 'grid' | 'list') || 'grid';
+  });
 
   useEffect(() => {
     dispatch(fetchSongsRequest(selectedGenre !== 'All' ? selectedGenre : undefined));
     dispatch(fetchStatisticsRequest());
   }, [dispatch, selectedGenre]);
+
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    localStorage.setItem('addis_song_view_mode', mode);
+  };
 
   const filteredSongs = useMemo(() => {
     let result = [...songs];
@@ -303,56 +470,131 @@ export const MusicLibrary: React.FC = () => {
           />
         </SearchInputWrapper>
 
-        <SortSelect
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
-        >
-          <option value="newest">Sort by: Recently Added</option>
-          <option value="title">Sort by: Title (A - Z)</option>
-          <option value="artist">Sort by: Artist (A - Z)</option>
-          <option value="album">Sort by: Album (A - Z)</option>
-        </SortSelect>
+        <RightControls>
+          <SortSelect
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+          >
+            <option value="newest">Sort by: Recently Added</option>
+            <option value="title">Sort by: Title (A - Z)</option>
+            <option value="artist">Sort by: Artist (A - Z)</option>
+            <option value="album">Sort by: Album (A - Z)</option>
+          </SortSelect>
+
+          <ViewToggleGroup>
+            <ViewToggleButton
+              active={viewMode === 'grid'}
+              onClick={() => handleViewModeChange('grid')}
+              title="Grid View"
+            >
+              <LayoutGrid size={16} />
+              <span>Grid</span>
+            </ViewToggleButton>
+            <ViewToggleButton
+              active={viewMode === 'list'}
+              onClick={() => handleViewModeChange('list')}
+              title="List View"
+            >
+              <List size={16} />
+              <span>List</span>
+            </ViewToggleButton>
+          </ViewToggleGroup>
+        </RightControls>
       </ControlsBar>
 
-      <SongsGrid>
-        {loading && songs.length === 0 ? (
-          <EmptyStateContainer>
-            <div className="icon-circle">
-              <Loader2 size={30} className="animate-spin" />
-            </div>
-            <h3>Loading Songs...</h3>
-            <p>Fetching your catalog from the Addis backend.</p>
-          </EmptyStateContainer>
-        ) : filteredSongs.length > 0 ? (
-          filteredSongs.map((song, index) => (
-            <SongCard key={song._id} song={song} index={index} />
-          ))
-        ) : (
-          <EmptyStateContainer>
-            <div className="icon-circle">
-              <Music4 size={30} />
-            </div>
-            <h3>No Songs Found</h3>
-            <p>
-              {searchTerm
-                ? `No songs match your search "${searchTerm}". Try resetting your filter or adding a new track.`
-                : selectedGenre !== 'All'
-                ? `No songs found under genre "${selectedGenre}".`
-                : 'Your library is empty. Start adding tracks to unlock full analytics!'}
-            </p>
-            <ButtonRow>
-              <ActionBtn onClick={() => dispatch(openCreateModal())}>
-                <Plus size={16} /> Add First Song
+      {loading && songs.length === 0 ? (
+        <EmptyStateContainer>
+          <div className="icon-circle">
+            <Loader2 size={30} className="animate-spin" />
+          </div>
+          <h3>Loading Songs...</h3>
+          <p>Fetching your catalog from the Addis backend.</p>
+        </EmptyStateContainer>
+      ) : filteredSongs.length === 0 ? (
+        <EmptyStateContainer>
+          <div className="icon-circle">
+            <Music4 size={30} />
+          </div>
+          <h3>No Songs Found</h3>
+          <p>
+            {searchTerm
+              ? `No songs match your search "${searchTerm}". Try resetting your filter or adding a new track.`
+              : selectedGenre !== 'All'
+              ? `No songs found under genre "${selectedGenre}".`
+              : 'Your library is empty. Start adding tracks to unlock full analytics!'}
+          </p>
+          <ButtonRow>
+            <ActionBtn onClick={() => dispatch(openCreateModal())}>
+              <Plus size={16} /> Add First Song
+            </ActionBtn>
+            {songs.length === 0 && (
+              <ActionBtn secondary onClick={handleSeedSamples}>
+                <Sparkles size={16} /> Seed Sample Tracks
               </ActionBtn>
-              {songs.length === 0 && (
-                <ActionBtn secondary onClick={handleSeedSamples}>
-                  <Sparkles size={16} /> Seed Sample Tracks
-                </ActionBtn>
-              )}
-            </ButtonRow>
-          </EmptyStateContainer>
-        )}
-      </SongsGrid>
+            )}
+          </ButtonRow>
+        </EmptyStateContainer>
+      ) : viewMode === 'grid' ? (
+        <SongsGrid className="animate-fade-in">
+          {filteredSongs.map((song, index) => (
+            <SongCard key={song._id} song={song} index={index} />
+          ))}
+        </SongsGrid>
+      ) : (
+        <TableContainer className="animate-fade-in">
+          <SongTable>
+            <thead>
+              <tr>
+                <th style={{ width: '60px' }}>#</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Genre</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredSongs.map((song, index) => (
+                <tr key={song._id}>
+                  <td style={{ fontWeight: 700, color: theme.colors.textDim }}>
+                    {index + 1}
+                  </td>
+                  <td>
+                    <SongTitleCell>
+                      <div className="mini-disc">
+                        <Disc3 size={18} />
+                      </div>
+                      <span className="title-text">{song.title}</span>
+                    </SongTitleCell>
+                  </td>
+                  <td style={{ color: '#ffffff', fontWeight: 600 }}>{song.artist}</td>
+                  <td>{song.album}</td>
+                  <td>
+                    <GenreTag>{song.genre}</GenreTag>
+                  </td>
+                  <td>
+                    <ActionsCell>
+                      <TableActionBtn
+                        onClick={() => dispatch(openEditModal(song))}
+                        title="Edit Song"
+                      >
+                        <Edit2 size={15} />
+                      </TableActionBtn>
+                      <TableActionBtn
+                        danger
+                        onClick={() => dispatch(setDeletingSongId(song._id))}
+                        title="Delete Song"
+                      >
+                        <Trash2 size={15} />
+                      </TableActionBtn>
+                    </ActionsCell>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </SongTable>
+        </TableContainer>
+      )}
     </PageWrapper>
   );
 };
