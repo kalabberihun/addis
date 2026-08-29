@@ -1,5 +1,4 @@
-import { Song } from '../models/song.model';
-import { PipelineStage } from 'mongoose';
+import { Song, ISong } from '../models/song.model';
 
 export interface StatisticsResult {
   totalSongs: number;
@@ -14,6 +13,7 @@ export interface StatisticsResult {
   top10Artists: { artist: string; songCount: number; albumCount: number }[];
   top10Albums: { album: string; artist: string; songCount: number }[];
   top10Genres: { genre: string; count: number }[];
+  recentSongs: ISong[];
 }
 
 export const getStatistics = async (): Promise<StatisticsResult> => {
@@ -80,6 +80,9 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
     { $sort: { songCount: -1, album: 1 } },
   ]);
 
+  // Recently added songs (latest 10 entries)
+  const recentSongs = await Song.find().sort({ createdAt: -1 }).limit(10).lean().exec();
+
   const topArtist = songsByArtist.length > 0 ? songsByArtist[0] : null;
   const topAlbum = songsByAlbum.length > 0 ? songsByAlbum[0] : null;
   const top10Artists = songsByArtist.slice(0, 10);
@@ -99,6 +102,7 @@ export const getStatistics = async (): Promise<StatisticsResult> => {
     top10Artists,
     top10Albums,
     top10Genres,
+    recentSongs: recentSongs as unknown as ISong[],
   };
 
   return stats;

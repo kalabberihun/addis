@@ -10,6 +10,8 @@ import {
   Loader2,
   Crown,
   Trophy,
+  Clock,
+  Disc3,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store';
 import { fetchStatisticsRequest } from '../store/songsSlice';
@@ -346,6 +348,98 @@ const GenreBarItem = styled.div`
   }
 `;
 
+const RecentSongList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: ${theme.radii.full};
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.35);
+    border-radius: ${theme.radii.full};
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.6);
+  }
+`;
+
+const RecentSongItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: ${theme.radii.sm};
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(16, 185, 129, 0.3);
+    transform: translateX(2px);
+  }
+
+  .left-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+
+    .disc-icon-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #34d399;
+      flex-shrink: 0;
+    }
+
+    .song-meta {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      .song-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #ffffff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .song-artist-album {
+        font-size: 0.76rem;
+        color: ${theme.colors.textMuted};
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .right-tags {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+`;
+
 const TableWrapper = styled.div`
   overflow-x: auto;
   max-height: 420px;
@@ -433,7 +527,7 @@ const RankBadge = styled.span<{ rank: number }>`
     rank <= 3 ? '0 0 8px rgba(245, 158, 11, 0.3)' : 'none'};
 `;
 
-const CountChip = styled.span<{ variant?: 'cyan' | 'pink' | 'amber' }>`
+const CountChip = styled.span<{ variant?: 'cyan' | 'pink' | 'amber' | 'emerald' }>`
   display: inline-block;
   padding: 0.15rem 0.5rem;
   border-radius: ${theme.radii.full};
@@ -444,12 +538,16 @@ const CountChip = styled.span<{ variant?: 'cyan' | 'pink' | 'amber' }>`
       ? 'rgba(236, 72, 153, 0.15)'
       : variant === 'amber'
       ? 'rgba(245, 158, 11, 0.15)'
+      : variant === 'emerald'
+      ? 'rgba(16, 185, 129, 0.15)'
       : 'rgba(6, 182, 212, 0.15)'};
   color: ${({ variant }) =>
     variant === 'pink'
       ? '#f472b6'
       : variant === 'amber'
       ? '#fbbf24'
+      : variant === 'emerald'
+      ? '#34d399'
       : '#22d3ee'};
   border: 1px solid
     ${({ variant }) =>
@@ -457,12 +555,31 @@ const CountChip = styled.span<{ variant?: 'cyan' | 'pink' | 'amber' }>`
         ? 'rgba(236, 72, 153, 0.3)'
         : variant === 'amber'
         ? 'rgba(245, 158, 11, 0.3)'
+        : variant === 'emerald'
+        ? 'rgba(16, 185, 129, 0.3)'
         : 'rgba(6, 182, 212, 0.3)'};
 `;
 
+const formatTimeAgo = (dateStr?: string) => {
+  if (!dateStr) return 'Recently';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / (1000 * 60));
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
 export const StatisticsDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { statistics, statsLoading } = useAppSelector((state) => state.songs);
+  const { statistics, statsLoading, songs } = useAppSelector((state) => state.songs);
 
   useEffect(() => {
     dispatch(fetchStatisticsRequest());
@@ -488,6 +605,12 @@ export const StatisticsDashboard: React.FC = () => {
   // All Genres
   const allGenres = statistics?.songsByGenre ?? [];
 
+  // Recently Added Songs (use statistics.recentSongs or latest from songs state)
+  const recentSongs =
+    (statistics?.recentSongs && statistics.recentSongs.length > 0)
+      ? statistics.recentSongs
+      : songs.slice(0, 10);
+
   return (
     <DashboardWrapper className="animate-fade-in">
       <PageHeader>
@@ -499,8 +622,8 @@ export const StatisticsDashboard: React.FC = () => {
           )}
         </h2>
         <p>
-          Real-time aggregates of songs, distinct artists, albums, and genre
-          distributions.
+          Real-time aggregates of songs, distinct artists, albums, genre
+          distributions, and recently added catalog tracks.
         </p>
       </PageHeader>
 
@@ -689,6 +812,7 @@ export const StatisticsDashboard: React.FC = () => {
         </HighlightCard>
       </TopHighlightsGrid>
 
+      {/* Row 1: Songs by Genre & Recently Added Songs */}
       <ContentSplitGrid>
         {/* All Songs in Every Genre */}
         <SectionCard>
@@ -730,6 +854,54 @@ export const StatisticsDashboard: React.FC = () => {
           </GenreBarList>
         </SectionCard>
 
+        {/* Recently Added Songs */}
+        <SectionCard>
+          <SectionTitle>
+            <h3>
+              <Clock size={18} color="#34d399" />
+              Recently Added Songs
+            </h3>
+            <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#6ee7b7' }}>
+              Latest {recentSongs.length}
+            </span>
+          </SectionTitle>
+
+          <RecentSongList>
+            {recentSongs.length > 0 ? (
+              recentSongs.map((song) => (
+                <RecentSongItem key={song._id}>
+                  <div className="left-content">
+                    <div className="disc-icon-badge">
+                      <Disc3 size={18} />
+                    </div>
+                    <div className="song-meta">
+                      <span className="song-title" title={song.title}>
+                        {song.title}
+                      </span>
+                      <span className="song-artist-album" title={`${song.artist} • ${song.album}`}>
+                        {song.artist} &bull; {song.album}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="right-tags">
+                    <CountChip variant="emerald">
+                      {formatTimeAgo(song.createdAt)}
+                    </CountChip>
+                    <CountChip variant="cyan">
+                      {song.genre}
+                    </CountChip>
+                  </div>
+                </RecentSongItem>
+              ))
+            ) : (
+              <p style={{ color: theme.colors.textDim }}>No recently added songs.</p>
+            )}
+          </RecentSongList>
+        </SectionCard>
+      </ContentSplitGrid>
+
+      {/* Row 2: Artists Directory & Albums Directory */}
+      <ContentSplitGrid>
         {/* Artists (Shows ALL Artists) */}
         <SectionCard>
           <SectionTitle>
@@ -780,59 +952,59 @@ export const StatisticsDashboard: React.FC = () => {
             </StyledTable>
           </TableWrapper>
         </SectionCard>
-      </ContentSplitGrid>
 
-      {/* Albums (Shows ALL Albums) */}
-      <SectionCard>
-        <SectionTitle>
-          <h3>
-            <ListMusic size={18} color={theme.colors.amber} />
-            Albums
-          </h3>
-          <span className="badge">
-            {allAlbums.length} {allAlbums.length === 1 ? 'Album' : 'Albums'}
-          </span>
-        </SectionTitle>
+        {/* Albums (Shows ALL Albums) */}
+        <SectionCard>
+          <SectionTitle>
+            <h3>
+              <ListMusic size={18} color={theme.colors.amber} />
+              Albums
+            </h3>
+            <span className="badge">
+              {allAlbums.length} {allAlbums.length === 1 ? 'Album' : 'Albums'}
+            </span>
+          </SectionTitle>
 
-        <TableWrapper>
-          <StyledTable>
-            <thead>
-              <tr>
-                <th>Album Title</th>
-                <th>Artist</th>
-                <th>Songs in Album</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allAlbums.length > 0 ? (
-                allAlbums.map((albumItem, idx) => (
-                  <tr key={`${albumItem.album}-${idx}`}>
-                    <td className="primary-cell">
-                      {albumItem.album}
-                    </td>
-                    <td>{albumItem.artist}</td>
-                    <td>
-                      <CountChip variant="cyan">
-                        {albumItem.songCount}{' '}
-                        {albumItem.songCount === 1 ? 'track' : 'tracks'}
-                      </CountChip>
+          <TableWrapper>
+            <StyledTable>
+              <thead>
+                <tr>
+                  <th>Album Title</th>
+                  <th>Artist</th>
+                  <th>Songs in Album</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allAlbums.length > 0 ? (
+                  allAlbums.map((albumItem, idx) => (
+                    <tr key={`${albumItem.album}-${idx}`}>
+                      <td className="primary-cell">
+                        {albumItem.album}
+                      </td>
+                      <td>{albumItem.artist}</td>
+                      <td>
+                        <CountChip variant="cyan">
+                          {albumItem.songCount}{' '}
+                          {albumItem.songCount === 1 ? 'track' : 'tracks'}
+                        </CountChip>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      style={{ textAlign: 'center', color: theme.colors.textDim }}
+                    >
+                      No album data available.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={3}
-                    style={{ textAlign: 'center', color: theme.colors.textDim }}
-                  >
-                    No album data available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </StyledTable>
-        </TableWrapper>
-      </SectionCard>
+                )}
+              </tbody>
+            </StyledTable>
+          </TableWrapper>
+        </SectionCard>
+      </ContentSplitGrid>
     </DashboardWrapper>
   );
 };

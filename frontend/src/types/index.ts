@@ -45,6 +45,7 @@ export interface StatisticsResult {
   top10Artists?: ArtistStat[];
   top10Albums?: AlbumStat[];
   top10Genres?: GenreStat[];
+  recentSongs?: Song[];
 }
 
 export interface SongsFilter {
