@@ -10,8 +10,6 @@ import {
   Loader2,
   Crown,
   Trophy,
-  Flame,
-  Sparkles,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store';
 import { fetchStatisticsRequest } from '../store/songsSlice';
@@ -107,10 +105,10 @@ const KpiCard = styled.div<{ gradient: string; glow: string }>`
   }
 `;
 
-/* Highlights / Top Record Cards */
+/* Highlights / Top 3 Podium Cards */
 const TopHighlightsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 1.5rem;
 `;
 
@@ -122,10 +120,10 @@ const HighlightCard = styled.div<{ accentColor: string; bgGlow: string }>`
   );
   border: 1px solid ${({ accentColor }) => accentColor};
   border-radius: ${theme.radii.lg};
-  padding: 1.75rem;
+  padding: 1.5rem 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
   position: relative;
   overflow: hidden;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4), ${({ bgGlow }) => bgGlow};
@@ -135,101 +133,105 @@ const HighlightCard = styled.div<{ accentColor: string; bgGlow: string }>`
     transform: translateY(-3px);
   }
 
-  .badge-ribbon {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0.3rem 0.75rem;
-    border-radius: ${theme.radii.full};
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    width: fit-content;
-  }
-
-  .content-row {
+  .card-header-row {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-  }
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
-  .trophy-icon-wrapper {
-    width: 62px;
-    height: 62px;
-    border-radius: 18px;
-    background: ${({ bgGlow }) => bgGlow};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
-    flex-shrink: 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-
-  .leader-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
-
-    h4 {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .sub-artist {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: ${theme.colors.textMuted};
-      display: flex;
+    .badge-ribbon {
+      display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #ffffff;
     }
-  }
 
-  .stats-pills-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 0.25rem;
-    flex-wrap: wrap;
+    span.podium-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: ${theme.radii.full};
+      background: rgba(255, 255, 255, 0.08);
+      color: ${theme.colors.textMuted};
+      text-transform: uppercase;
+    }
   }
 `;
 
-const StatBadge = styled.span<{ variant?: 'amber' | 'pink' | 'cyan' }>`
-  display: inline-flex;
+const Top3List = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+`;
+
+const Top3Item = styled.div<{ rank: number }>`
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.8rem;
-  border-radius: ${theme.radii.full};
-  font-size: 0.84rem;
-  font-weight: 700;
-  background: ${({ variant }) =>
-    variant === 'amber'
-      ? 'rgba(245, 158, 11, 0.2)'
-      : variant === 'pink'
-      ? 'rgba(236, 72, 153, 0.2)'
-      : 'rgba(6, 182, 212, 0.2)'};
-  color: ${({ variant }) =>
-    variant === 'amber'
-      ? '#fbbf24'
-      : variant === 'pink'
-      ? '#f472b6'
-      : '#22d3ee'};
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: ${theme.radii.md};
+  background: ${({ rank }) =>
+    rank === 1
+      ? 'rgba(245, 158, 11, 0.08)'
+      : rank === 2
+      ? 'rgba(148, 163, 184, 0.06)'
+      : 'rgba(217, 119, 6, 0.05)'};
   border: 1px solid
-    ${({ variant }) =>
-      variant === 'amber'
-        ? 'rgba(245, 158, 11, 0.4)'
-        : variant === 'pink'
-        ? 'rgba(236, 72, 153, 0.4)'
-        : 'rgba(6, 182, 212, 0.4)'};
+    ${({ rank }) =>
+      rank === 1
+        ? 'rgba(245, 158, 11, 0.35)'
+        : rank === 2
+        ? 'rgba(148, 163, 184, 0.25)'
+        : 'rgba(217, 119, 6, 0.2)'};
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(3px);
+  }
+
+  .left-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+
+    .titles {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      .main-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #ffffff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .sub-title {
+        font-size: 0.78rem;
+        color: ${theme.colors.textMuted};
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .right-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
 `;
 
 const ContentSplitGrid = styled.div`
@@ -407,7 +409,31 @@ const StyledTable = styled.table`
   }
 `;
 
-const CountChip = styled.span<{ variant?: 'cyan' | 'pink' }>`
+const RankBadge = styled.span<{ rank: number }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+  background: ${({ rank }) =>
+    rank === 1
+      ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+      : rank === 2
+      ? 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)'
+      : rank === 3
+      ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)'
+      : 'rgba(255, 255, 255, 0.06)'};
+  color: #ffffff;
+  box-shadow: ${({ rank }) =>
+    rank <= 3 ? '0 0 10px rgba(245, 158, 11, 0.3)' : 'none'};
+`;
+
+const CountChip = styled.span<{ variant?: 'cyan' | 'pink' | 'amber' }>`
   display: inline-block;
   padding: 0.2rem 0.6rem;
   border-radius: ${theme.radii.full};
@@ -416,13 +442,21 @@ const CountChip = styled.span<{ variant?: 'cyan' | 'pink' }>`
   background: ${({ variant }) =>
     variant === 'pink'
       ? 'rgba(236, 72, 153, 0.15)'
+      : variant === 'amber'
+      ? 'rgba(245, 158, 11, 0.15)'
       : 'rgba(6, 182, 212, 0.15)'};
   color: ${({ variant }) =>
-    variant === 'pink' ? '#f472b6' : '#22d3ee'};
+    variant === 'pink'
+      ? '#f472b6'
+      : variant === 'amber'
+      ? '#fbbf24'
+      : '#22d3ee'};
   border: 1px solid
     ${({ variant }) =>
       variant === 'pink'
         ? 'rgba(236, 72, 153, 0.3)'
+        : variant === 'amber'
+        ? 'rgba(245, 158, 11, 0.3)'
         : 'rgba(6, 182, 212, 0.3)'};
 `;
 
@@ -435,8 +469,12 @@ export const StatisticsDashboard: React.FC = () => {
   }, [dispatch]);
 
   const totalSongs = statistics?.totalSongs ?? 0;
-  const topArtist = statistics?.topArtist;
-  const topAlbum = statistics?.topAlbum;
+
+  // Top 3 Artists by Song Count
+  const top3Artists = statistics?.songsByArtist?.slice(0, 3) ?? [];
+
+  // Top 3 Albums by Track Count
+  const top3Albums = statistics?.songsByAlbum?.slice(0, 3) ?? [];
 
   // All Artists (sorted by song count descending)
   const allArtists = statistics?.songsByArtist ?? [];
@@ -518,69 +556,88 @@ export const StatisticsDashboard: React.FC = () => {
         </KpiCard>
       </KpiGrid>
 
-      {/* #1 Top Records Highlight Cards */}
+      {/* Top 3 Artists & Top 3 Albums Podium Showcase */}
       <TopHighlightsGrid>
-        {/* Top Artist by Song Count */}
+        {/* Top 3 Artists by Song Count */}
         <HighlightCard
           accentColor="rgba(245, 158, 11, 0.4)"
-          bgGlow="linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)"
+          bgGlow="linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%)"
         >
-          <div className="badge-ribbon">
-            <Crown size={14} color="#fbbf24" />
-            Top Artist Leader (#1)
-          </div>
-          <div className="content-row">
-            <div className="trophy-icon-wrapper">
-              <Crown size={32} />
+          <div className="card-header-row">
+            <div className="badge-ribbon">
+              <Crown size={17} color="#fbbf24" />
+              <span>Top 3 Artists (by Song Count)</span>
             </div>
-            <div className="leader-details">
-              <h4 title={topArtist?.artist || 'No artist data'}>
-                {topArtist ? topArtist.artist : 'N/A'}
-              </h4>
-              <div className="sub-artist">
-                <Flame size={14} color="#f59e0b" />
-                <span>Most songs in catalog</span>
-              </div>
-            </div>
+            <span className="podium-tag">Podium</span>
           </div>
-          <div className="stats-pills-row">
-            <StatBadge variant="amber">
-              <Music size={13} /> {topArtist?.songCount ?? 0} Songs
-            </StatBadge>
-            <StatBadge variant="cyan">
-              <Disc size={13} /> {topArtist?.albumCount ?? 0} Albums
-            </StatBadge>
-          </div>
+
+          <Top3List>
+            {top3Artists.length > 0 ? (
+              top3Artists.map((artistItem, idx) => (
+                <Top3Item key={artistItem.artist} rank={idx + 1}>
+                  <div className="left-info">
+                    <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
+                    <div className="titles">
+                      <span className="main-title" title={artistItem.artist}>
+                        {artistItem.artist}
+                      </span>
+                      <span className="sub-title">
+                        {artistItem.albumCount} {artistItem.albumCount === 1 ? 'Album' : 'Albums'} in catalog
+                      </span>
+                    </div>
+                  </div>
+                  <div className="right-badges">
+                    <CountChip variant="amber">
+                      {artistItem.songCount} {artistItem.songCount === 1 ? 'Song' : 'Songs'}
+                    </CountChip>
+                  </div>
+                </Top3Item>
+              ))
+            ) : (
+              <p style={{ color: theme.colors.textDim, fontSize: '0.88rem' }}>No artist data available.</p>
+            )}
+          </Top3List>
         </HighlightCard>
 
-        {/* Top Album by Track Count */}
+        {/* Top 3 Albums by Track Count */}
         <HighlightCard
           accentColor="rgba(236, 72, 153, 0.4)"
-          bgGlow="linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)"
+          bgGlow="linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)"
         >
-          <div className="badge-ribbon">
-            <Trophy size={14} color="#f472b6" />
-            Top Album Leader (#1)
-          </div>
-          <div className="content-row">
-            <div className="trophy-icon-wrapper">
-              <Disc size={32} />
+          <div className="card-header-row">
+            <div className="badge-ribbon">
+              <Trophy size={17} color="#f472b6" />
+              <span>Top 3 Albums (by Track Count)</span>
             </div>
-            <div className="leader-details">
-              <h4 title={topAlbum?.album || 'No album data'}>
-                {topAlbum ? topAlbum.album : 'N/A'}
-              </h4>
-              <div className="sub-artist">
-                <Users size={14} color="#ec4899" />
-                <span>by {topAlbum ? topAlbum.artist : 'N/A'}</span>
-              </div>
-            </div>
+            <span className="podium-tag">Podium</span>
           </div>
-          <div className="stats-pills-row">
-            <StatBadge variant="pink">
-              <Sparkles size={13} /> {topAlbum?.songCount ?? 0} Tracks in Album
-            </StatBadge>
-          </div>
+
+          <Top3List>
+            {top3Albums.length > 0 ? (
+              top3Albums.map((albumItem, idx) => (
+                <Top3Item key={`${albumItem.album}-${idx}`} rank={idx + 1}>
+                  <div className="left-info">
+                    <RankBadge rank={idx + 1}>{idx + 1}</RankBadge>
+                    <div className="titles">
+                      <span className="main-title" title={albumItem.album}>
+                        {albumItem.album}
+                      </span>
+                      <span className="sub-title">
+                        by {albumItem.artist}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="right-badges">
+                    <CountChip variant="pink">
+                      {albumItem.songCount} {albumItem.songCount === 1 ? 'Track' : 'Tracks'}
+                    </CountChip>
+                  </div>
+                </Top3Item>
+              ))
+            ) : (
+              <p style={{ color: theme.colors.textDim, fontSize: '0.88rem' }}>No album data available.</p>
+            )}
+          </Top3List>
         </HighlightCard>
       </TopHighlightsGrid>
 
