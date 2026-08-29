@@ -9,12 +9,22 @@ export interface ISong extends Document {
   updatedAt: Date;
 }
 
-const toTitleCase = (str: string): string =>
-  str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+export const toTitleCase = (str: string): string => {
+  if (!str) return str;
+  return str
+    .trim()
+    .split(/\s+/)
+    .map((word) => {
+      if (word.includes('-')) {
+        return word
+          .split('-')
+          .map((part) => (part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : ''))
+          .join('-');
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
     .join(' ');
+};
 
 const SongSchema = new Schema<ISong>(
   {
@@ -26,12 +36,18 @@ const SongSchema = new Schema<ISong>(
   { timestamps: true }
 );
 
-// Pre‑save hook to normalize artist and genre to Title Case
+// Pre-save hook to normalize title, artist, album, and genre regardless of casing
 SongSchema.pre('save', async function () {
-  if (this.isModified('artist')) {
+  if (this.isModified('title') && this.title) {
+    this.title = toTitleCase(this.title);
+  }
+  if (this.isModified('artist') && this.artist) {
     this.artist = toTitleCase(this.artist);
   }
-  if (this.isModified('genre')) {
+  if (this.isModified('album') && this.album) {
+    this.album = toTitleCase(this.album);
+  }
+  if (this.isModified('genre') && this.genre) {
     this.genre = toTitleCase(this.genre);
   }
 });
