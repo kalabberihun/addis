@@ -1,18 +1,57 @@
-version: '3.8'
 services:
+  mongodb:
+    image: mongo:7
+    container_name: addis_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=addis_song_manager
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - addis_network
+
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: addis_backend
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
+      - PORT=5000
       - MONGODB_URI=mongodb://mongodb:27017/addis_song_manager
     depends_on:
-      - mongodb
-  mongodb:
-    image: mongo:7
+      mongodb:
+        condition: service_healthy
+    networks:
+      - addis_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: addis_frontend
+    restart: unless-stopped
     ports:
-      - "27017:27017"
-    volumes:
-      - mongodata:/data/db
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - addis_network
+
 volumes:
   mongodata:
+    driver: local
+
+networks:
+  addis_network:
+    driver: bridge
